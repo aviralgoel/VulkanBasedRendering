@@ -30,6 +30,18 @@
     <ClCompile Include="vbr_pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vbr_device.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vbr_device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vbr_swapchain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vbr_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vbr_window.hpp">
@@ -39,6 +51,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vbr_pipeline.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vbr_swapchain.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vbr_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

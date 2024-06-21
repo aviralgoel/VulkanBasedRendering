@@ -1,30 +1,31 @@
 #pragma once
 
-#include <string>
-#pragma once
-
 #define GLFW_INCLUDE_VULKAN
-#include<GLFW/glfw3.h>
+#include <GLFW/glfw3.h>
+
 #include <string>
-
 namespace vbr {
-	class VbrWindow {
 
+	class VbrWindow {
 	public:
-		VbrWindow(const int w, const int h, const std::string name);
+		VbrWindow(int w, int h, std::string name);
 		~VbrWindow();
-		void initWindow();
-		bool shouldClose();
 
 		VbrWindow(const VbrWindow&) = delete;
-		VbrWindow& operator= (const VbrWindow&) = delete;
+		VbrWindow& operator=(const VbrWindow&) = delete;
+
+		bool shouldClose() { return glfwWindowShouldClose(window); }
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:
-		const uint32_t width;
-		const uint32_t height;
-		const std::string windowName;
+		void initWindow();
+
+		const int width;
+		const int height;
+
+		std::string windowName;
 		GLFWwindow* window;
-
 	};
-}
-
+}  // namespace lve

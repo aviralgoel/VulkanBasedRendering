@@ -1,20 +1,21 @@
-#include "vbr_application.hpp"
-#include <stdexcept>
-#include <iostream>
-#include <cstdlib>
 
-int main()
-{	
-	vbr::VbrApplication MyApplication{};
-	
-	try {
-		MyApplication.run();
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-	
-	return EXIT_SUCCESS;
+#include "vbr_application.hpp"
+
+// std
+#include <cstdlib>
+#include <iostream>
+#include <stdexcept>
+
+int main() {
+    vbr::VbrApplication app{};
+
+    try {
+        app.run();
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
