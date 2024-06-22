@@ -122,9 +122,9 @@ namespace vbr {
     void VbrApplication::loadModels()
     {
         std::vector<VbrModel::Vertex> vertices = { 
-            {{0.0f,0.0f}}, 
-            {{-1.0f,0.0f}}, 
-            {{-1.0f,1.0f}}
+            {{0.0f,0.0f}, {1.0f, 0.0f, 0.0f}},
+            {{-1.0f,0.0f}, {0.0f, 1.0f, 0.0f}},
+            {{-1.0f,1.0f}, {0.0f, 0.0f, 1.0f}}
         };
 
         vbrMyModel = std::make_unique<VbrModel>(vbrMyDevice, vertices);
