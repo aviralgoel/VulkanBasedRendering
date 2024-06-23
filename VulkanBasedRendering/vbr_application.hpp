@@ -28,12 +28,15 @@ namespace vbr {
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
+		void freeCommandBuffers();
 		void drawFrame();
 		void loadModels();
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 
-		VbrWindow lveWindow{ WIDTH, HEIGHT, "Hello Vulkan!" }; // create a window and surface based on device and glfw
-		VbrDevice vbrMyDevice{ lveWindow }; //
-		VbrSwapChain lveSwapChain{ vbrMyDevice, lveWindow.getExtent() };
+		VbrWindow vbrWindow{ WIDTH, HEIGHT, "Hello Vulkan!" }; // create a window and surface based on device and glfw
+		VbrDevice vbrMyDevice{ vbrWindow }; //
+		std::unique_ptr<VbrSwapChain> vbrSwapChain;
 		std::unique_ptr<VbrPipeline> vbrMyPipeline;
 		std::unique_ptr<VbrModel> vbrMyModel;
 		VkPipelineLayout pipelineLayout;

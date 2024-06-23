@@ -9,21 +9,28 @@
 namespace vbr {
 
     struct PipelineConfigInfo {
-        VkViewport viewport;
-        VkRect2D scissor;
+
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo multisampleInfo;
         VkPipelineColorBlendAttachmentState colorBlendAttachment;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineViewportStateCreateInfo viewPortInfo;
+        std::vector<VkDynamicState> dynamicStates;
+        VkPipelineDynamicStateCreateInfo dynamicStateInfo;
         VkPipelineLayout pipelineLayout = nullptr;
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
+
+        PipelineConfigInfo(const PipelineConfigInfo&) = default;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
     };
 
     class VbrPipeline {
     public:
+        VbrPipeline() = default;
         VbrPipeline(
             VbrDevice& device,
             const std::string& vertFilepath,
@@ -32,11 +39,11 @@ namespace vbr {
         ~VbrPipeline();
 
         VbrPipeline(const VbrPipeline&) = delete;
-        void operator=(const VbrPipeline&) = delete;
+        VbrPipeline& operator=(const VbrPipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
 
-        static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        static void defaultPipelineConfigInfo(PipelineConfigInfo&);
 
     private:
         static std::vector<char> readFile(const std::string& filepath);

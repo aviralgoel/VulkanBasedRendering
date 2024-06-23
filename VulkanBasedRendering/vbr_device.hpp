@@ -31,11 +31,12 @@ namespace vbr {
 #endif
 
         VbrDevice(VbrWindow& window);
+        VbrDevice() = default;
         ~VbrDevice();
 
         // Not copyable or movable
         VbrDevice(const VbrDevice&) = delete;
-        void operator=(const VbrDevice&) = delete;
+        VbrDevice& operator=(const VbrDevice&) = delete;
         VbrDevice(VbrDevice&&) = delete;
         VbrDevice& operator=(VbrDevice&&) = delete;
 

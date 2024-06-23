@@ -23,6 +23,7 @@ namespace vbr {
 
 		VbrModel(VbrDevice& devRef, const std::vector<Vertex>& vertices);
 		~VbrModel();
+		VbrModel() = default;
 
 		VbrModel(const VbrModel&) = delete;
 		VbrModel& operator=(const VbrModel&) = delete;

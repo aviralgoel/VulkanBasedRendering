@@ -15,12 +15,14 @@ namespace vbr {
         : device{ deviceRef }, windowExtent{ extent } {
         
         std::cout << "Swapchain:: creating a swapchain, and for each image a image view, then a renderpass and then depth buffers, finally frame buffers for each swapchain image and sync Objcets\n";
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
-        createSyncObjects();
+        init();
+
+    }
+
+    VbrSwapChain::VbrSwapChain(VbrDevice& deviceRef, VkExtent2D extent, std::shared_ptr<VbrSwapChain> previous) : device{ deviceRef }, windowExtent{ extent }, oldSwapChain(previous)
+    {
+        init();
+        oldSwapChain = nullptr;
     }
 
     VbrSwapChain::~VbrSwapChain() {
@@ -120,6 +122,16 @@ namespace vbr {
         return result;
     }
 
+    void VbrSwapChain::init()
+    {
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createDepthResources();
+        createFramebuffers();
+        createSyncObjects();
+    }
+
     void VbrSwapChain::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
@@ -164,7 +176,7 @@ namespace vbr {
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = (oldSwapChain==nullptr) ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
         if (vkCreateSwapchainKHR(device.getDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
@@ -263,8 +275,8 @@ namespace vbr {
     }
 
     void VbrSwapChain::createFramebuffers() {
-        swapChainFramebuffers.resize(imageCount());
-        for (size_t i = 0; i < imageCount(); i++) {
+        swapChainFramebuffers.resize(getImageCount());
+        for (size_t i = 0; i < getImageCount(); i++) {
             std::array<VkImageView, 2> attachments = { swapChainImageViews[i], depthImageViews[i] };
 
             VkExtent2D swapChainExtent = getSwapChainExtent();
@@ -291,9 +303,9 @@ namespace vbr {
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D swapChainExtent = getSwapChainExtent();
 
-        depthImages.resize(imageCount());
-        depthImageMemorys.resize(imageCount());
-        depthImageViews.resize(imageCount());
+        depthImages.resize(getImageCount());
+        depthImageMemorys.resize(getImageCount());
+        depthImageViews.resize(getImageCount());
 
         for (int i = 0; i < depthImages.size(); i++) {
             VkImageCreateInfo imageInfo{};
@@ -339,7 +351,7 @@ namespace vbr {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        imagesInFlight.resize(imageCount(), VK_NULL_HANDLE);
+        imagesInFlight.resize(getImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

@@ -8,6 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace vbr {
 
@@ -16,15 +17,17 @@ namespace vbr {
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         VbrSwapChain(VbrDevice& deviceRef, VkExtent2D windowExtent);
+        VbrSwapChain(VbrDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VbrSwapChain> previous);
         ~VbrSwapChain();
+        VbrSwapChain() = default;
 
         VbrSwapChain(const VbrSwapChain&) = delete;
-        void operator=(const VbrSwapChain&) = delete;
+        VbrSwapChain& operator=(const VbrSwapChain&) = delete;
 
         VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
         VkRenderPass getRenderPass() { return renderPass; }
         VkImageView getImageView(int index) { return swapChainImageViews[index]; }
-        size_t imageCount() { return swapChainImages.size(); }
+        size_t getImageCount() { return swapChainImages.size(); }
         VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
         VkExtent2D getSwapChainExtent() { return swapChainExtent; }
         uint32_t width() { return swapChainExtent.width; }
@@ -39,6 +42,7 @@ namespace vbr {
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
     private:
+        void init();
         void createSwapChain();
         void createImageViews();
         void createDepthResources();
@@ -75,6 +79,8 @@ namespace vbr {
         std::vector<VkFence> inFlightFences;
         std::vector<VkFence> imagesInFlight;
         size_t currentFrame = 0;
+
+        std::shared_ptr<VbrSwapChain> oldSwapChain;
     };
 
 }  // namespace lve
