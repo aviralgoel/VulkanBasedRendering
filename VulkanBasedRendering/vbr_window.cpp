@@ -2,6 +2,7 @@
 
 // std
 #include <stdexcept>
+#include <iostream>
 
 namespace vbr {
 
@@ -15,6 +16,7 @@ namespace vbr {
     }
 
     void VbrWindow::initWindow() {
+        std::cout << "Creating a window with GLFW and making it resizeable\n";
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);

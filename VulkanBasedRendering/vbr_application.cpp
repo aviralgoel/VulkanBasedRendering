@@ -9,7 +9,7 @@
 namespace vbr {
 
     VbrApplication::VbrApplication() {
-        std::cout << "Creating a vulkan application\n";
+        std::cout << "Creating a Vulkan Application" << std::endl;
         loadModels();
         createPipelineLayout();
         recreateSwapChain();
@@ -31,7 +31,8 @@ namespace vbr {
     }
 
     void VbrApplication::createPipelineLayout() {
-        std::cout << "Application:: creating pipeline layout\n";
+        
+        std::cout << "Application:: creating pipeline layout for logical device\n";
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
@@ -46,12 +47,13 @@ namespace vbr {
 
     void VbrApplication::createPipeline() {
 
+        std::cout << "Creating a graphics pipeline\n";
         assert(vbrSwapChain != nullptr && "Cannot create pipeline before swap chain");
         assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
         std::cout << "Application:: creating pipeline with default pipeline config, a renderpass from swapchain, a pipeline layout and shaders\n";
         PipelineConfigInfo configInfo{};
         VbrPipeline::defaultPipelineConfigInfo(configInfo);
-
+        std::cout << "with some default config info\n";
         
         configInfo.renderPass = vbrSwapChain->getRenderPass();
         configInfo.pipelineLayout = pipelineLayout;
@@ -63,6 +65,7 @@ namespace vbr {
     }
 
     void VbrApplication::createCommandBuffers() {
+
         std::cout << "Application:: creating commandBuffers for each swapchain image\n";
         commandBuffers.resize(vbrSwapChain->getImageCount());
 
@@ -110,18 +113,21 @@ namespace vbr {
     }
 
     void VbrApplication::loadModels()
-    {
+    {   
+        std::cout << "Loading a 3D Model data" << std::endl;
         std::vector<VbrModel::Vertex> vertices = { 
             {{0.0f,0.0f}, {1.0f, 0.0f, 0.0f}},
             {{-1.0f,0.0f}, {0.0f, 1.0f, 0.0f}},
             {{-1.0f,1.0f}, {0.0f, 0.0f, 1.0f}}
         };
 
+        std::cout << "Creating a VbrModel object" << std::endl;
         vbrMyModel = std::make_unique<VbrModel>(vbrMyDevice, vertices);
     }
 
     void VbrApplication::recreateSwapChain()
-    {
+    {   
+        std::cout << "Recreating/Creating swapchain based on window extents\n";
         auto extent = vbrWindow.getExtent();
         while (extent.width == 0 || extent.height == 0)
         {
@@ -130,11 +136,13 @@ namespace vbr {
         }
         vkDeviceWaitIdle(vbrMyDevice.getDevice());
         if (vbrSwapChain == nullptr)
-        {
+        {   
+            std::cout << "Creating swapchain based on window extents\n";
             vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent);
         }
         else
-        {
+        {   
+            std::cout << "Recreating swapchain based on window extents\n";
             vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent, std::move(vbrSwapChain));
             if (vbrSwapChain->getImageCount() != commandBuffers.size())
             {

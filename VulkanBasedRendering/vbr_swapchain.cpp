@@ -123,7 +123,8 @@ namespace vbr {
     }
 
     void VbrSwapChain::init()
-    {
+    {   
+        
         createSwapChain();
         createImageViews();
         createRenderPass();
@@ -133,6 +134,7 @@ namespace vbr {
     }
 
     void VbrSwapChain::createSwapChain() {
+        std::cout << "Creating a swapchain and getting handles to the swapchain as well as swapchain images and swapchain properties\n";
         SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -195,6 +197,7 @@ namespace vbr {
     }
 
     void VbrSwapChain::createImageViews() {
+        std::cout << "Creating image views for all the swapchain images\n";
         swapChainImageViews.resize(swapChainImages.size());
         for (size_t i = 0; i < swapChainImages.size(); i++) {
             VkImageViewCreateInfo viewInfo{};
@@ -216,6 +219,7 @@ namespace vbr {
     }
 
     void VbrSwapChain::createRenderPass() {
+        std::cout << "Creating a renderpass\n";
         VkAttachmentDescription depthAttachment{};
         depthAttachment.format = findDepthFormat();
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -275,6 +279,8 @@ namespace vbr {
     }
 
     void VbrSwapChain::createFramebuffers() {
+
+        std::cout << "Creating frame buffer for every swapchain image\n";
         swapChainFramebuffers.resize(getImageCount());
         for (size_t i = 0; i < getImageCount(); i++) {
             std::array<VkImageView, 2> attachments = { swapChainImageViews[i], depthImageViews[i] };
@@ -300,6 +306,9 @@ namespace vbr {
     }
 
     void VbrSwapChain::createDepthResources() {
+        
+        
+        std::cout << "Creating depth image, image view, image memory\n";
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D swapChainExtent = getSwapChainExtent();
 
@@ -348,6 +357,8 @@ namespace vbr {
     }
 
     void VbrSwapChain::createSyncObjects() {
+
+        std::cout << "Creating availImageSemaphore, renderFinishImage Semaphore, inflightImageFence, and inFLight fences for each swapchain image\n";
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -421,6 +432,7 @@ namespace vbr {
     }
 
     VkFormat VbrSwapChain::findDepthFormat() {
+
         return device.findSupportedFormat(
             { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
             VK_IMAGE_TILING_OPTIMAL,

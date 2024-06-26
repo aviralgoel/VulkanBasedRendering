@@ -47,6 +47,8 @@ namespace vbr {
         const std::string& vertFilepath,
         const std::string& fragFilepath,
         const PipelineConfigInfo& configInfo) {
+
+        std::cout << "Creating a graphics pipeline\n" << std::endl;
         assert(
             configInfo.pipelineLayout != VK_NULL_HANDLE &&
             "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");

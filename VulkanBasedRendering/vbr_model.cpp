@@ -1,5 +1,6 @@
 #include "vbr_model.hpp"
 
+#include <iostream>
 #include <cassert>
 
 
@@ -8,7 +9,8 @@ namespace vbr
 {
 
 	VbrModel::VbrModel(VbrDevice& devRef, const std::vector<Vertex>& vertices) : vbrDevice(devRef)
-	{
+	{	
+		std::cout << "Creating a VbrModel object with loaded vertices" << std::endl;
 		createVertexBuffers(vertices);
 	}
 
@@ -33,7 +35,8 @@ namespace vbr
 	}
 
 	void VbrModel::createVertexBuffers(const std::vector<Vertex>& vertices)
-	{
+	{	
+		std::cout<<"Creating a vertex buffer with required amount of memory size on our device\n";
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count is atleast three");
 
@@ -45,11 +48,11 @@ namespace vbr
 			vertexBuffer,
 			vertexBufferMemory);
 
+		std::cout << "Copying data from our HOST memory to DEVICE memory" << std::endl;
 		void* data;
 		vkMapMemory(vbrDevice.getDevice(), vertexBufferMemory, 0, bufferSize, 0, &data);
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(vbrDevice.getDevice(), vertexBufferMemory);
-
 
 	}
 

@@ -7,7 +7,8 @@
 #include <stdexcept>
 
 int main() {
-    vbr::VbrApplication app{};
+
+    vbr::VbrApplication app{}; // on the stack
 
     try {
         app.run();
