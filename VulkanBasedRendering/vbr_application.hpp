@@ -6,11 +6,19 @@
 #include "vbr_window.hpp"
 #include "vbr_model.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 // std
 #include <memory>
 #include <vector>
 
 namespace vbr {
+	struct SimplePushConstantData {
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
+	};
 	class VbrApplication {
 	public:
 		static constexpr int WIDTH = 800;
