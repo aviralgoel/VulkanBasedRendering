@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vbr_application.hpp" />
+    <ClInclude Include="vbr_game_object.hpp" />
     <ClInclude Include="vbr_model.hpp" />
     <ClInclude Include="vbr_pipeline.hpp" />
     <ClInclude Include="vbr_swapchain.hpp" />

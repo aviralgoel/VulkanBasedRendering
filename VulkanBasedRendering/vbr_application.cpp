@@ -1,5 +1,10 @@
 #include "vbr_application.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
 // std
 #include <array>
 #include <stdexcept>
@@ -10,15 +15,15 @@ namespace vbr {
 
     VbrApplication::VbrApplication() {
         std::cout << "Creating a Vulkan Application" << std::endl;
-        loadModels();
+        loadGameObjects();
         createPipelineLayout();
         recreateSwapChain();
         createCommandBuffers();
     }
 
-    VbrApplication::~VbrApplication() 
-    { 
-        vkDestroyPipelineLayout(vbrMyDevice.getDevice(), pipelineLayout, nullptr); 
+    VbrApplication::~VbrApplication()
+    {
+        vkDestroyPipelineLayout(vbrMyDevice.getDevice(), pipelineLayout, nullptr);
     }
 
     void VbrApplication::run() {
@@ -31,7 +36,7 @@ namespace vbr {
     }
 
     void VbrApplication::createPipelineLayout() {
-        
+
 
         std::cout << "Application:: creating pipeline layout for logical device\n";
 
@@ -61,7 +66,7 @@ namespace vbr {
         PipelineConfigInfo configInfo{};
         VbrPipeline::defaultPipelineConfigInfo(configInfo);
         std::cout << "with some default config info\n";
-        
+
         configInfo.renderPass = vbrSwapChain->getRenderPass();
         configInfo.pipelineLayout = pipelineLayout;
         vbrMyPipeline = std::make_unique<VbrPipeline>(
@@ -87,7 +92,7 @@ namespace vbr {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-       
+
     }
     void VbrApplication::freeCommandBuffers()
     {
@@ -119,21 +124,30 @@ namespace vbr {
         }
     }
 
-    void VbrApplication::loadModels()
-    {   
+    void VbrApplication::loadGameObjects()
+    {
         std::cout << "Loading a 3D Model data" << std::endl;
-        std::vector<VbrModel::Vertex> vertices = { 
-            {{0.0f,0.0f}, {1.0f, 0.0f, 0.0f}},
-            {{-1.0f,0.0f}, {0.0f, 1.0f, 0.0f}},
-            {{-1.0f,1.0f}, {0.0f, 0.0f, 1.0f}}
+        std::vector<VbrModel::Vertex> vertices = {
+            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f,0.5f}, {0.0f, 0.0f, 1.0f}}
         };
 
         std::cout << "Creating a VbrModel object" << std::endl;
-        vbrMyModel = std::make_unique<VbrModel>(vbrMyDevice, vertices);
+        auto vbrMyModel = std::make_shared<VbrModel>(vbrMyDevice, vertices);
+
+        auto triangle = VbrGameObject::createGameObject();
+        triangle.model = vbrMyModel;
+        triangle.color = { 0.1f, 0.8f, 0.1f };
+        triangle.transform2d.translation.x = 0.2f;
+        triangle.transform2d.scale = { 1.0f, 1.0f };
+        triangle.transform2d.rotation = 0.0f * glm::two_pi<float>();
+
+        gameObjects.push_back(std::move(triangle));
     }
 
     void VbrApplication::recreateSwapChain()
-    {   
+    {
         std::cout << "Recreating/Creating swapchain based on window extents\n";
         auto extent = vbrWindow.getExtent();
         while (extent.width == 0 || extent.height == 0)
@@ -143,12 +157,12 @@ namespace vbr {
         }
         vkDeviceWaitIdle(vbrMyDevice.getDevice());
         if (vbrSwapChain == nullptr)
-        {   
+        {
             std::cout << "Creating swapchain based on window extents\n";
             vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent);
         }
         else
-        {   
+        {
             std::cout << "Recreating swapchain based on window extents\n";
             vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent, std::move(vbrSwapChain));
             if (vbrSwapChain->getImageCount() != commandBuffers.size())
@@ -158,77 +172,87 @@ namespace vbr {
             }
         }
 
-        
-        
+
+
         createPipeline();
     }
 
     void VbrApplication::recordCommandBuffer(int imageIndex)
     {
-            
-            static int frame = 0;
-            frame = (frame + 1) % 100;
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-            if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = vbrSwapChain->getRenderPass();
-            renderPassInfo.framebuffer = vbrSwapChain->getFrameBuffer(imageIndex);
-
-            renderPassInfo.renderArea.offset = { 0, 0 };
-            renderPassInfo.renderArea.extent = vbrSwapChain->getSwapChainExtent();
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
-            clearValues[1].depthStencil = { 1.0f, 0 };
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(vbrSwapChain->getSwapChainExtent().width);
-            viewport.height = static_cast<float>(vbrSwapChain->getSwapChainExtent().height);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
-            VkRect2D scissor{};
-            scissor.offset = { 0,0 };
-            scissor.extent = vbrSwapChain->getSwapChainExtent();
-            vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
-
-
-            vbrMyPipeline->bind(commandBuffers[imageIndex]); // bind the pipeline
-            vbrMyModel->bind(commandBuffers[imageIndex]);
-
-
-            for (int i = 0; i < 4; i++)
-            {
-                SimplePushConstantData push{};
-                push.offset = { -0.50f+(frame*0.02f), -0.4f + i * 0.25f };
-                push.color = { 0.0f, 0.0f, 0.2f + 0.2f * i };
-                vkCmdPushConstants(commandBuffers[imageIndex], 
-                    pipelineLayout, 
-                    VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
-                    sizeof(SimplePushConstantData), 
-                    &push);
-                vbrMyModel->draw(commandBuffers[imageIndex]);
-            }
-
-            
-
-            vkCmdEndRenderPass(commandBuffers[imageIndex]);
-            if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer!");
-            }
         
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = vbrSwapChain->getRenderPass();
+        renderPassInfo.framebuffer = vbrSwapChain->getFrameBuffer(imageIndex);
+
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = vbrSwapChain->getSwapChainExtent();
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(vbrSwapChain->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(vbrSwapChain->getSwapChainExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+        VkRect2D scissor{};
+        scissor.offset = { 0,0 };
+        scissor.extent = vbrSwapChain->getSwapChainExtent();
+        vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+
+        renderGameObjects(commandBuffers[imageIndex]);
+
+
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+        if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+
     }
 
-}  // namespace lve
+    void VbrApplication::renderGameObjects(VkCommandBuffer buffer)
+    {
+        vbrMyPipeline->bind(buffer);
+
+        for (auto& obj : gameObjects)
+        {   
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+            SimplePushConstantData push{};
+
+            push.offset = obj.transform2d.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2d.mat2();
+
+
+            vkCmdPushConstants(buffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                sizeof(SimplePushConstantData),
+                &push);
+
+            obj.model->bind(buffer);
+            obj.model->draw(buffer);
+
+        }
+    }
+
+} // class
+
