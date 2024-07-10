@@ -149,20 +149,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="vbr_render_system.cpp" />
     <ClCompile Include="vbr_application.cpp" />
     <ClCompile Include="vbr_device.cpp" />
     <ClCompile Include="vbr_device.hpp" />
     <ClCompile Include="vbr_model.cpp" />
     <ClCompile Include="vbr_pipeline.cpp" />
+    <ClCompile Include="vbr_renderer.cpp" />
     <ClCompile Include="vbr_swapchain.cpp" />
     <ClCompile Include="vbr_window.cpp" />
     <ClCompile Include="VulkanBasedRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="vbr_render_system.hpp" />
     <ClInclude Include="vbr_application.hpp" />
     <ClInclude Include="vbr_game_object.hpp" />
     <ClInclude Include="vbr_model.hpp" />
     <ClInclude Include="vbr_pipeline.hpp" />
+    <ClInclude Include="vbr_renderer.hpp" />
     <ClInclude Include="vbr_swapchain.hpp" />
     <ClInclude Include="vbr_window.hpp" />
   </ItemGroup>
