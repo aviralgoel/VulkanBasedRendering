@@ -21,6 +21,7 @@ namespace vbr {
 		VbrRenderer& operator=(const VbrRenderer&) = delete;
 
 		VkRenderPass getSwapChainRenderPass() const { return vbrSwapChain->getRenderPass(); }
+		float getAspectRatio() const { return vbrSwapChain->extentAspectRatio(); }
 
 		VkCommandBuffer beginFrame();
 		void endFrame();

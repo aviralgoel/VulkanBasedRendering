@@ -2,6 +2,7 @@
 
 #include "vbr_device.hpp"
 #include "vbr_pipeline.hpp"
+#include "vbr_camera.hpp"
 
 #include "vbr_game_object.hpp"
 
@@ -24,7 +25,7 @@ namespace vbr {
 		RenderSystem(const RenderSystem&) = delete;
 		RenderSystem& operator=(const RenderSystem&) = delete;
 
-		void renderGameObjects(VkCommandBuffer buffer, std::vector<VbrGameObject>& gameObjects);
+		void renderGameObjects(VkCommandBuffer buffer, std::vector<VbrGameObject>& gameObjects, const VbrCamera& camera);
 		
 
 	private:
