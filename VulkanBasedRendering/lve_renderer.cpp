@@ -1,73 +1,69 @@
-#include "vbr_renderer.hpp"
+#include "lve_renderer.hpp"
 
 // std
 #include <array>
 #include <cassert>
 #include <stdexcept>
 
-namespace vbr {
+namespace lve {
 
-    VbrRenderer::VbrRenderer(VbrWindow& window, VbrDevice& device)
-        : vbrWindow{ window }, vbrMyDevice{ device } {
+    LveRenderer::LveRenderer(LveWindow& window, LveDevice& device)
+        : lveWindow{ window }, lveDevice{ device } {
         recreateSwapChain();
         createCommandBuffers();
     }
 
-    VbrRenderer::~VbrRenderer() { freeCommandBuffers(); }
+    LveRenderer::~LveRenderer() { freeCommandBuffers(); }
 
-    void VbrRenderer::recreateSwapChain() {
-        auto extent = vbrWindow.getExtent();
+    void LveRenderer::recreateSwapChain() {
+        auto extent = lveWindow.getExtent();
         while (extent.width == 0 || extent.height == 0) {
-            extent = vbrWindow.getExtent();
+            extent = lveWindow.getExtent();
             glfwWaitEvents();
         }
-        vkDeviceWaitIdle(vbrMyDevice.getDevice());
+        vkDeviceWaitIdle(lveDevice.device());
 
-        if (vbrSwapChain == nullptr) {
-            vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent);
+        if (lveSwapChain == nullptr) {
+            lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent);
         }
         else {
-            std::shared_ptr<VbrSwapChain> oldSwapChain = std::move(vbrSwapChain);
-            vbrSwapChain = std::make_unique<VbrSwapChain>(vbrMyDevice, extent, oldSwapChain);
+            std::shared_ptr<LveSwapChain> oldSwapChain = std::move(lveSwapChain);
+            lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent, oldSwapChain);
 
-            if (oldSwapChain->compareSwapFormats(*vbrSwapChain.get()) == false)
-            {
-                throw std::runtime_error("swapchain image format has changed!\n");
-
+            if (!oldSwapChain->compareSwapFormats(*lveSwapChain.get())) {
+                throw std::runtime_error("Swap chain image(or depth) format has changed!");
             }
-
-
         }
     }
 
-    void VbrRenderer::createCommandBuffers() {
-        commandBuffers.resize(VbrSwapChain::MAX_FRAMES_IN_FLIGHT);
+    void LveRenderer::createCommandBuffers() {
+        commandBuffers.resize(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = vbrMyDevice.getCommandPool();
+        allocInfo.commandPool = lveDevice.getCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-        if (vkAllocateCommandBuffers(vbrMyDevice.getDevice(), &allocInfo, commandBuffers.data()) !=
+        if (vkAllocateCommandBuffers(lveDevice.device(), &allocInfo, commandBuffers.data()) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
 
-    void VbrRenderer::freeCommandBuffers() {
+    void LveRenderer::freeCommandBuffers() {
         vkFreeCommandBuffers(
-            vbrMyDevice.getDevice(),
-            vbrMyDevice.getCommandPool(),
+            lveDevice.device(),
+            lveDevice.getCommandPool(),
             static_cast<uint32_t>(commandBuffers.size()),
             commandBuffers.data());
         commandBuffers.clear();
     }
 
-    VkCommandBuffer VbrRenderer::beginFrame() {
+    VkCommandBuffer LveRenderer::beginFrame() {
         assert(!isFrameStarted && "Can't call beginFrame while already in progress");
 
-        auto result = vbrSwapChain->acquireNextImage(&currentImageIndex);
+        auto result = lveSwapChain->acquireNextImage(&currentImageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             recreateSwapChain();
             return nullptr;
@@ -89,17 +85,17 @@ namespace vbr {
         return commandBuffer;
     }
 
-    void VbrRenderer::endFrame() {
+    void LveRenderer::endFrame() {
         assert(isFrameStarted && "Can't call endFrame while frame is not in progress");
         auto commandBuffer = getCurrentCommandBuffer();
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to record command buffer!");
         }
 
-        auto result = vbrSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
+        auto result = lveSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-            vbrWindow.wasWindowResized()) {
-            vbrWindow.resetWindowResizedFlag();
+            lveWindow.wasWindowResized()) {
+            lveWindow.resetWindowResizedFlag();
             recreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
@@ -107,11 +103,10 @@ namespace vbr {
         }
 
         isFrameStarted = false;
-        currentFrameIndex = (currentFrameIndex + 1) % VbrSwapChain::MAX_FRAMES_IN_FLIGHT;
-        
+        currentFrameIndex = (currentFrameIndex + 1) % LveSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void VbrRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         assert(isFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress");
         assert(
             commandBuffer == getCurrentCommandBuffer() &&
@@ -119,11 +114,11 @@ namespace vbr {
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vbrSwapChain->getRenderPass();
-        renderPassInfo.framebuffer = vbrSwapChain->getFrameBuffer(currentImageIndex);
+        renderPassInfo.renderPass = lveSwapChain->getRenderPass();
+        renderPassInfo.framebuffer = lveSwapChain->getFrameBuffer(currentImageIndex);
 
         renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = vbrSwapChain->getSwapChainExtent();
+        renderPassInfo.renderArea.extent = lveSwapChain->getSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
@@ -136,16 +131,16 @@ namespace vbr {
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(vbrSwapChain->getSwapChainExtent().width);
-        viewport.height = static_cast<float>(vbrSwapChain->getSwapChainExtent().height);
+        viewport.width = static_cast<float>(lveSwapChain->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(lveSwapChain->getSwapChainExtent().height);
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        VkRect2D scissor{ {0, 0}, vbrSwapChain->getSwapChainExtent() };
+        VkRect2D scissor{ {0, 0}, lveSwapChain->getSwapChainExtent() };
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void VbrRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress");
         assert(
             commandBuffer == getCurrentCommandBuffer() &&

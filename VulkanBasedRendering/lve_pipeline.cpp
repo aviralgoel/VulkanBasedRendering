@@ -1,5 +1,6 @@
-#include "vbr_pipeline.hpp"
-#include "vbr_model.hpp"
+#include "lve_pipeline.hpp"
+
+#include "lve_model.hpp"
 
 // std
 #include <cassert>
@@ -7,10 +8,10 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace vbr {
+namespace lve {
 
-    VbrPipeline::VbrPipeline(
-        VbrDevice& device,
+    LvePipeline::LvePipeline(
+        LveDevice& device,
         const std::string& vertFilepath,
         const std::string& fragFilepath,
         const PipelineConfigInfo& configInfo)
@@ -18,15 +19,13 @@ namespace vbr {
         createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
     }
 
-    
-
-    VbrPipeline::~VbrPipeline() {
-        vkDestroyShaderModule(lveDevice.getDevice(), vertShaderModule, nullptr);
-        vkDestroyShaderModule(lveDevice.getDevice(), fragShaderModule, nullptr);
-        vkDestroyPipeline(lveDevice.getDevice(), graphicsPipeline, nullptr);
+    LvePipeline::~LvePipeline() {
+        vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
+        vkDestroyShaderModule(lveDevice.device(), fragShaderModule, nullptr);
+        vkDestroyPipeline(lveDevice.device(), graphicsPipeline, nullptr);
     }
 
-    std::vector<char> VbrPipeline::readFile(const std::string& filepath) {
+    std::vector<char> LvePipeline::readFile(const std::string& filepath) {
         std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
         if (!file.is_open()) {
@@ -43,12 +42,10 @@ namespace vbr {
         return buffer;
     }
 
-    void VbrPipeline::createGraphicsPipeline(
+    void LvePipeline::createGraphicsPipeline(
         const std::string& vertFilepath,
         const std::string& fragFilepath,
         const PipelineConfigInfo& configInfo) {
-
-        std::cout << "Creating a graphics pipeline\n" << std::endl;
         assert(
             configInfo.pipelineLayout != VK_NULL_HANDLE &&
             "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
@@ -78,17 +75,15 @@ namespace vbr {
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        auto bindingDescriptions = VbrModel::Vertex::getBindingDescriptions();
-        auto attributeDescriptions = VbrModel::Vertex::getAttributeDescriptions();
-
+        auto bindingDescriptions = LveModel::Vertex::getBindingDescriptions();
+        auto attributeDescriptions = LveModel::Vertex::getAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.vertexAttributeDescriptionCount =
+            static_cast<uint32_t>(attributeDescriptions.size());
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
         vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
-
-
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -96,7 +91,7 @@ namespace vbr {
         pipelineInfo.pStages = shaderStages;
         pipelineInfo.pVertexInputState = &vertexInputInfo;
         pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-        pipelineInfo.pViewportState = &configInfo.viewPortInfo;
+        pipelineInfo.pViewportState = &configInfo.viewportInfo;
         pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
         pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
         pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
@@ -111,7 +106,7 @@ namespace vbr {
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
         if (vkCreateGraphicsPipelines(
-            lveDevice.getDevice(),
+            lveDevice.device(),
             VK_NULL_HANDLE,
             1,
             &pipelineInfo,
@@ -121,34 +116,31 @@ namespace vbr {
         }
     }
 
-    void VbrPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void LvePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-        if (vkCreateShaderModule(lveDevice.getDevice(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+        if (vkCreateShaderModule(lveDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
             throw std::runtime_error("failed to create shader module");
         }
     }
 
-    void VbrPipeline::bind(VkCommandBuffer commandBuffer) {
+    void LvePipeline::bind(VkCommandBuffer commandBuffer) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     }
 
-    void VbrPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
-        std::cout << "Pipeline STATIC:: creating a default pipeline config\n";
-        
-
+    void LvePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
         configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
-        configInfo.viewPortInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        configInfo.viewPortInfo.viewportCount = 1;
-        configInfo.viewPortInfo.scissorCount = 1;
-        configInfo.viewPortInfo.pViewports = nullptr;
-        configInfo.viewPortInfo.pScissors = nullptr;
+        configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        configInfo.viewportInfo.viewportCount = 1;
+        configInfo.viewportInfo.pViewports = nullptr;
+        configInfo.viewportInfo.scissorCount = 1;
+        configInfo.viewportInfo.pScissors = nullptr;
 
         configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
@@ -202,15 +194,12 @@ namespace vbr {
         configInfo.depthStencilInfo.front = {};  // Optional
         configInfo.depthStencilInfo.back = {};   // Optional
 
-        configInfo.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-
-
+        configInfo.dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
         configInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStates.size());
-        configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStates.data();
+        configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
+        configInfo.dynamicStateInfo.dynamicStateCount =
+            static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
         configInfo.dynamicStateInfo.flags = 0;
-
-        
     }
 
 }  // namespace lve

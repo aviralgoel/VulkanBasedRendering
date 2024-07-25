@@ -21,63 +21,63 @@
     <ClCompile Include="VulkanBasedRendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_window.cpp">
+    <ClCompile Include="lve_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_application.cpp">
+    <ClCompile Include="first_app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_pipeline.cpp">
+    <ClCompile Include="lve_pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_device.hpp">
+    <ClCompile Include="lve_device.hpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_device.cpp">
+    <ClCompile Include="lve_device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_swapchain.cpp">
+    <ClCompile Include="lve_swap_chain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_model.cpp">
+    <ClCompile Include="lve_model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_renderer.cpp">
+    <ClCompile Include="lve_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_render_system.cpp">
+    <ClCompile Include="simple_render_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vbr_camera.cpp">
+    <ClCompile Include="lve_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vbr_window.hpp">
+    <ClInclude Include="lve_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_application.hpp">
+    <ClInclude Include="first_app.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_pipeline.hpp">
+    <ClInclude Include="lve_pipeline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_swapchain.hpp">
+    <ClInclude Include="lve_swap_chain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_model.hpp">
+    <ClInclude Include="lve_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_game_object.hpp">
+    <ClInclude Include="lve_game_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_renderer.hpp">
+    <ClInclude Include="lve_renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_render_system.hpp">
+    <ClInclude Include="simple_render_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vbr_camera.hpp">
+    <ClInclude Include="lve_camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,5 @@
 
-#include "vbr_application.hpp"
+#include "first_app.hpp"
 
 // std
 #include <cstdlib>
@@ -7,8 +7,7 @@
 #include <stdexcept>
 
 int main() {
-
-    vbr::VbrApplication app{}; // on the stack
+    lve::FirstApp app{};
 
     try {
         app.run();

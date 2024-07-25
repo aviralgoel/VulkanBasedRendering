@@ -149,28 +149,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="vbr_camera.cpp" />
-    <ClCompile Include="vbr_render_system.cpp" />
-    <ClCompile Include="vbr_application.cpp" />
-    <ClCompile Include="vbr_device.cpp" />
-    <ClCompile Include="vbr_device.hpp" />
-    <ClCompile Include="vbr_model.cpp" />
-    <ClCompile Include="vbr_pipeline.cpp" />
-    <ClCompile Include="vbr_renderer.cpp" />
-    <ClCompile Include="vbr_swapchain.cpp" />
-    <ClCompile Include="vbr_window.cpp" />
+    <ClCompile Include="lve_camera.cpp" />
+    <ClCompile Include="simple_render_system.cpp" />
+    <ClCompile Include="first_app.cpp" />
+    <ClCompile Include="lve_device.cpp" />
+    <ClCompile Include="lve_device.hpp" />
+    <ClCompile Include="lve_model.cpp" />
+    <ClCompile Include="lve_pipeline.cpp" />
+    <ClCompile Include="lve_renderer.cpp" />
+    <ClCompile Include="lve_swap_chain.cpp" />
+    <ClCompile Include="lve_window.cpp" />
     <ClCompile Include="VulkanBasedRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vbr_camera.hpp" />
-    <ClInclude Include="vbr_render_system.hpp" />
-    <ClInclude Include="vbr_application.hpp" />
-    <ClInclude Include="vbr_game_object.hpp" />
-    <ClInclude Include="vbr_model.hpp" />
-    <ClInclude Include="vbr_pipeline.hpp" />
-    <ClInclude Include="vbr_renderer.hpp" />
-    <ClInclude Include="vbr_swapchain.hpp" />
-    <ClInclude Include="vbr_window.hpp" />
+    <ClInclude Include="lve_camera.hpp" />
+    <ClInclude Include="simple_render_system.hpp" />
+    <ClInclude Include="first_app.hpp" />
+    <ClInclude Include="lve_game_object.hpp" />
+    <ClInclude Include="lve_model.hpp" />
+    <ClInclude Include="lve_pipeline.hpp" />
+    <ClInclude Include="lve_renderer.hpp" />
+    <ClInclude Include="lve_swap_chain.hpp" />
+    <ClInclude Include="lve_window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag" />

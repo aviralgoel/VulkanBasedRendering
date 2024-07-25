@@ -1,49 +1,47 @@
 #pragma once
 
-#include "vbr_device.hpp"
+#include "lve_device.hpp"
 
 // std
 #include <string>
 #include <vector>
 
-namespace vbr {
+namespace lve {
 
     struct PipelineConfigInfo {
+        PipelineConfigInfo() = default;
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
+        VkPipelineViewportStateCreateInfo viewportInfo;
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo multisampleInfo;
         VkPipelineColorBlendAttachmentState colorBlendAttachment;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-        VkPipelineViewportStateCreateInfo viewPortInfo;
-        std::vector<VkDynamicState> dynamicStates;
+        std::vector<VkDynamicState> dynamicStateEnables;
         VkPipelineDynamicStateCreateInfo dynamicStateInfo;
         VkPipelineLayout pipelineLayout = nullptr;
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
-
-        PipelineConfigInfo(const PipelineConfigInfo&) = default;
-        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
-
     };
 
-    class VbrPipeline {
+    class LvePipeline {
     public:
-        VbrPipeline() = default;
-        VbrPipeline(
-            VbrDevice& device,
+        LvePipeline(
+            LveDevice& device,
             const std::string& vertFilepath,
             const std::string& fragFilepath,
             const PipelineConfigInfo& configInfo);
-        ~VbrPipeline();
+        ~LvePipeline();
 
-        VbrPipeline(const VbrPipeline&) = delete;
-        VbrPipeline& operator=(const VbrPipeline&) = delete;
+        LvePipeline(const LvePipeline&) = delete;
+        LvePipeline& operator=(const LvePipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
 
-        static void defaultPipelineConfigInfo(PipelineConfigInfo&);
+        static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
     private:
         static std::vector<char> readFile(const std::string& filepath);
@@ -55,7 +53,7 @@ namespace vbr {
 
         void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        VbrDevice& lveDevice;
+        LveDevice& lveDevice;
         VkPipeline graphicsPipeline;
         VkShaderModule vertShaderModule;
         VkShaderModule fragShaderModule;

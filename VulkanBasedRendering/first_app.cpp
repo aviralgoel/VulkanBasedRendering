@@ -1,8 +1,9 @@
-#include "vbr_application.hpp"
-#include "vbr_render_system.hpp"
+#include "first_app.hpp"
 
-#include "vbr_camera.hpp"
+#include "lve_camera.hpp"
+#include "simple_render_system.hpp"
 
+// libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -10,55 +11,42 @@
 
 // std
 #include <array>
-#include <stdexcept>
-#include <iostream>
 #include <cassert>
+#include <stdexcept>
 
+namespace lve {
 
-namespace vbr {
+    FirstApp::FirstApp() { loadGameObjects(); }
 
-    VbrApplication::VbrApplication() {
-        std::cout << "Creating a Vulkan Application" << std::endl;
-        loadGameObjects();
-    }
+    FirstApp::~FirstApp() {}
 
-    VbrApplication::~VbrApplication()
-    {
-       
-    }
+    void FirstApp::run() {
+        SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
+        LveCamera camera{};
 
-    void VbrApplication::run() {
-
-        RenderSystem myRendersystem{ vbrMyDevice, vbrRenderer.getSwapChainRenderPass() };
-        VbrCamera camera{};
-
-        
-        while (!vbrWindow.shouldClose()) {
+        while (!lveWindow.shouldClose()) {
             glfwPollEvents();
 
-            float aspect = vbrRenderer.getAspectRatio();
-            //camera.setOrthographicsProject(-aspect, aspect, -1, 1, -1, 1);
-            camera.setPerspectiveProject(glm::radians(45.0f), aspect, 1.0f, 10.0f);
+            float aspect = lveRenderer.getAspectRatio();
+            // camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
-            if (auto commandBuffer = vbrRenderer.beginFrame())
-            {   
-                
-                vbrRenderer.beginSwapChainRenderPass(commandBuffer);
-                myRendersystem.renderGameObjects(commandBuffer, gameObjects, camera);
-                vbrRenderer.endSwapChainRenderPass(commandBuffer);
-                vbrRenderer.endFrame();
-           }
+            if (auto commandBuffer = lveRenderer.beginFrame()) {
+                lveRenderer.beginSwapChainRenderPass(commandBuffer);
+
+                simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+
+                lveRenderer.endSwapChainRenderPass(commandBuffer);
+                lveRenderer.endFrame();
+            }
         }
 
-        vkDeviceWaitIdle(vbrMyDevice.getDevice());
+        vkDeviceWaitIdle(lveDevice.device());
     }
 
-
-
-
     // temporary helper function, creates a 1x1x1 cube centered at offset
-    std::unique_ptr<VbrModel> createCubeModel(VbrDevice& device, glm::vec3 offset) {
-        std::vector<VbrModel::Vertex> vertices{
+    std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
+        std::vector<LveModel::Vertex> vertices{
 
             // left face (white)
             {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
@@ -112,19 +100,17 @@ namespace vbr {
         for (auto& v : vertices) {
             v.position += offset;
         }
-        return std::make_unique<VbrModel>(device, vertices);
-    }
-    void VbrApplication::loadGameObjects()
-    {
-        std::shared_ptr<VbrModel> cubeModel = createCubeModel(vbrMyDevice, { 0.0f, 0.0f, 0.0f });
-
-        VbrGameObject cubeObject = VbrGameObject::createGameObject();
-        cubeObject.model = cubeModel;
-        cubeObject.transform.translation = { 0.0f, 0.0f, 2.5f };
-        cubeObject.transform.scale = { 0.5f, 0.5f, 0.5f };
-        gameObjects.push_back(std::move(cubeObject));
-
+        return std::make_unique<LveModel>(device, vertices);
     }
 
-} // class
+    void FirstApp::loadGameObjects() {
+        std::shared_ptr<LveModel> lveModel = createCubeModel(lveDevice, { .0f, .0f, .0f });
+        auto cube = LveGameObject::createGameObject();
+        cube.model = lveModel;
+        cube.transform.translation = { .0f, .0f, 2.5f };
+        cube.transform.scale = { .5f, .5f, .5f };
+        gameObjects.push_back(std::move(cube));
+    }
+
+}  // namespace lve
 
