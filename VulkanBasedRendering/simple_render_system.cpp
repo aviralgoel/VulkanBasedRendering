@@ -69,7 +69,6 @@ namespace lve {
         auto projectionView = camera.getProjection() * camera.getView();
 
         for (auto& obj : gameObjects) {
-            
             SimplePushConstantData push{};
             push.color = obj.color;
             push.transform = projectionView * obj.transform.mat4();

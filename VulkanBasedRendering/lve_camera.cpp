@@ -27,6 +27,7 @@ namespace lve {
         projectionMatrix[2][3] = 1.f;
         projectionMatrix[3][2] = -(far * near) / (far - near);
     }
+
     void LveCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
         const glm::vec3 w{ glm::normalize(direction) };
         const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };
@@ -75,4 +76,5 @@ namespace lve {
         viewMatrix[3][1] = -glm::dot(v, position);
         viewMatrix[3][2] = -glm::dot(w, position);
     }
+
 }  // namespace lve
