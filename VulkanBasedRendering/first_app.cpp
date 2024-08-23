@@ -3,6 +3,7 @@
 #include "keyboard_user_controller.hpp"
 #include "lve_camera.hpp"
 #include "simple_render_system.hpp"
+#include "lve_buffer.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -15,14 +16,37 @@
 #include <cassert>
 #include <chrono>
 #include <stdexcept>
+#include <numeric>
 
 namespace lve {
+
+    struct GlobalUbo {
+        glm::mat4 projectionView{ 1.f };
+        glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+    };
+
 
     FirstApp::FirstApp() { loadGameObjects(); }
 
     FirstApp::~FirstApp() {}
 
     void FirstApp::run() {
+
+        std::vector<std::unique_ptr<LveBuffer>> uniformBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (size_t i = 0; i < LveSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+			uniformBuffers[i] = std::make_unique<LveBuffer>(lveDevice,
+															 sizeof(GlobalUbo),
+                1,
+															 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+															 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+            uniformBuffers[i]->map();
+		}
+
+
+    
+
+
+
         SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
         LveCamera camera{};
 
@@ -45,9 +69,21 @@ namespace lve {
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
             if (auto commandBuffer = lveRenderer.beginFrame()) {
+                int frameIndex = lveRenderer.getFrameIndex();
+
+                FrameInfo frameInfo{ frameIndex, commandBuffer, frameTime, camera };
+                // update
+                GlobalUbo globalUbo{};
+                globalUbo.projectionView = camera.getProjection() * camera.getView();
+                uniformBuffers[frameIndex]->writeToBuffer(&globalUbo);
+                uniformBuffers[frameIndex]->flush();
+
+
+
+                // render
                 lveRenderer.beginSwapChainRenderPass(commandBuffer);
 
-                simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+                simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
 
                 lveRenderer.endSwapChainRenderPass(commandBuffer);
                 lveRenderer.endFrame();
@@ -65,11 +101,12 @@ namespace lve {
         flatVase.transform.scale = { 3.f, 1.5f, 3.f };
         gameObjects.push_back(std::move(flatVase));
 
-        lveModel = LveModel::createModelFromFile(lveDevice, "models/smooth_vase.obj");
+        lveModel = LveModel::createModelFromFile(lveDevice, "models/teapot.obj");
         auto smoothVase = LveGameObject::createGameObject();
         smoothVase.model = lveModel;
         smoothVase.transform.translation = { .5f, .5f, 2.5f };
-        smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
+        smoothVase.transform.scale = { 0.25f, 0.250f, 0.250f };
+        smoothVase.transform.rotation = { glm::radians(180.0f), glm::radians(160.0f), 0.f};
         gameObjects.push_back(std::move(smoothVase));
     }
 
