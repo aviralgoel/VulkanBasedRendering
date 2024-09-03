@@ -46,6 +46,7 @@ namespace lve {
                 },
                 {translation.x, translation.y, translation.z, 1.0f} };
         }
+        glm::mat3 normalMatrix();
 
     };
 
