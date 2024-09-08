@@ -154,6 +154,7 @@
     <ClCompile Include="lve_camera.cpp" />
     <ClCompile Include="lve_descriptor.cpp" />
     <ClCompile Include="lve_game_object.cpp" />
+    <ClCompile Include="point_light_system.cpp" />
     <ClCompile Include="simple_render_system.cpp" />
     <ClCompile Include="first_app.cpp" />
     <ClCompile Include="lve_device.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="lve_descriptor.hpp" />
     <ClInclude Include="lve_frame_info.hpp" />
     <ClInclude Include="lve_utils.hpp" />
+    <ClInclude Include="point_light_system.hpp" />
     <ClInclude Include="simple_render_system.hpp" />
     <ClInclude Include="first_app.hpp" />
     <ClInclude Include="lve_game_object.hpp" />
@@ -182,6 +184,8 @@
     <ClInclude Include="lve_window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\pointlights.frag" />
+    <None Include="Shaders\pointlights.vert" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
   </ItemGroup>

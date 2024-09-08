@@ -11,15 +11,15 @@
 #include <vector>
 
 namespace lve {
-    class SimpleRenderSystem {
+    class PointLightSystem {
     public:
-        SimpleRenderSystem(LveDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetlayout);
-        ~SimpleRenderSystem();
+        PointLightSystem(LveDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetlayout);
+        ~PointLightSystem();
 
-        SimpleRenderSystem(const SimpleRenderSystem&) = delete;
-        SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
+        PointLightSystem(const PointLightSystem&) = delete;
+        PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-        void renderGameObjects(FrameInfo& frameInfo);
+        void render(FrameInfo& frameInfo);
 
     private:
         void createPipelineLayout(VkDescriptorSetLayout globalSetlayout);

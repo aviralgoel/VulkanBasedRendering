@@ -33,6 +33,6 @@ namespace lve {
 
 
 		std::unique_ptr<LveDescriptorPool> globalPool{};
-		std::vector<LveGameObject> gameObjects;
+		lve::LveGameObject::Map gameObjectsMap{};
 	};
 }  // namespace lve

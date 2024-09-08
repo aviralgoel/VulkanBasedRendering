@@ -3,6 +3,7 @@
 #include "keyboard_user_controller.hpp"
 #include "lve_camera.hpp"
 #include "simple_render_system.hpp"
+#include "point_light_system.hpp"
 #include "lve_buffer.hpp"
 
 // libs
@@ -21,7 +22,8 @@
 namespace lve {
 
     struct GlobalUbo {
-        glm::mat4 projectionView{ 1.f };
+        glm::mat4 projection{ 1.f };
+        glm::mat4 view{ 1.f };
         glm::vec4 ambientColor { 1.f, 1.f, 1.f, 0.02f }; // 
         glm::vec3 lightPosition{ -1.f }; // light from the front
         alignas(16) glm::vec4 lightColor {0.8f, 0.6f, 0.2f, 1.0f}; // white light
@@ -54,7 +56,7 @@ namespace lve {
 
         auto globalSetLayout =
             LveDescriptorSetLayout::Builder(lveDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .build();
 
         std::vector<VkDescriptorSet> globalDescriptorSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -68,6 +70,9 @@ namespace lve {
 
 
         SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+        PointLightSystem pointLightSystem{ lveDevice, lveRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+
+
         LveCamera camera{};
 
         auto viewerObject = LveGameObject::createGameObject();
@@ -87,15 +92,16 @@ namespace lve {
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
             float aspect = lveRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
 
             if (auto commandBuffer = lveRenderer.beginFrame()) {
                 int frameIndex = lveRenderer.getFrameIndex();
 
-                FrameInfo frameInfo{ frameIndex, commandBuffer, frameTime, camera, globalDescriptorSets[frameIndex]};
+                FrameInfo frameInfo{ frameIndex, commandBuffer, frameTime, camera, globalDescriptorSets[frameIndex], gameObjectsMap};
                 // update
                 GlobalUbo globalUbo{};
-                globalUbo.projectionView = camera.getProjection() * camera.getView();
+                globalUbo.projection = camera.getProjection();
+                globalUbo.view = camera.getView();
                 uniformBuffers[frameIndex]->writeToBuffer(&globalUbo);
                 uniformBuffers[frameIndex]->flush();
 
@@ -104,7 +110,8 @@ namespace lve {
                 // render
                 lveRenderer.beginSwapChainRenderPass(commandBuffer);
 
-                simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+                simpleRenderSystem.renderGameObjects(frameInfo);
+                pointLightSystem.render(frameInfo);
 
                 lveRenderer.endSwapChainRenderPass(commandBuffer);
                 lveRenderer.endFrame();
@@ -120,7 +127,7 @@ namespace lve {
         flatVase.model = lveModel;
         flatVase.transform.translation = { -.5f, .5f, 0.0f };
         flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-        gameObjects.push_back(std::move(flatVase));
+        gameObjectsMap.emplace(flatVase.getId(), std::move(flatVase));
 
 
 
@@ -129,14 +136,14 @@ namespace lve {
         smoothVase.model = lveModel;
         smoothVase.transform.translation = { .5f, .5f, 0.0f };
         smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-        gameObjects.push_back(std::move(smoothVase));
+        gameObjectsMap.emplace(smoothVase.getId(), std::move(smoothVase));
 
         lveModel = LveModel::createModelFromFile(lveDevice, "models/floor.obj");
         auto floor = LveGameObject::createGameObject();
         floor.model = lveModel;
         floor.transform.translation = { 0.f, 0.5f, 0.0f };
         floor.transform.scale = { 2.f, 1.f, 2.f };
-        gameObjects.push_back(std::move(floor));
+        gameObjectsMap.emplace(floor.getId(),std::move(floor));
     }
 
 }  // namespace lve
