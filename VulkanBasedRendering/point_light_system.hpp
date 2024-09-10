@@ -6,6 +6,7 @@
 #include "lve_pipeline.hpp"
 #include "lve_frame_info.hpp"
 
+
 // std
 #include <memory>
 #include <vector>
@@ -19,6 +20,7 @@ namespace lve {
         PointLightSystem(const PointLightSystem&) = delete;
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
+        void update(FrameInfo& frameInfo, GlobalUbo& ubo);
         void render(FrameInfo& frameInfo);
 
     private:

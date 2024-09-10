@@ -1,6 +1,8 @@
 #include "lve_game_object.hpp"
 
-glm::mat3 lve::TransformComponent::normalMatrix()
+namespace lve{
+
+glm::mat3 TransformComponent::normalMatrix()
 {
     const float c3 = glm::cos(rotation.z);
     const float s3 = glm::sin(rotation.z);
@@ -28,3 +30,6 @@ glm::mat3 lve::TransformComponent::normalMatrix()
         },
     };
 }
+
+
+} // namespace lve

@@ -78,6 +78,7 @@ namespace lve {
 
 
         for (auto& obj : frameInfo.gameObjects) {
+            if(obj.second.pointLight != nullptr) continue;
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.second.transform.mat4();
 			push.normalMatrix = obj.second.transform.normalMatrix();
