@@ -96,6 +96,7 @@ namespace lve {
                 GlobalUbo globalUbo{};
                 globalUbo.projection = camera.getProjection();
                 globalUbo.view = camera.getView();
+                globalUbo.inverseView = camera.getInverseView();
                 pointLightSystem.update(frameInfo, globalUbo);
                 uniformBuffers[frameIndex]->writeToBuffer(&globalUbo);
                 uniformBuffers[frameIndex]->flush();

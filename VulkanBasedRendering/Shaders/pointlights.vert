@@ -21,11 +21,11 @@ layout(set = 0, binding = 0) uniform GlobalUbo
 {
 mat4 projection;
 mat4 view;
+mat4 inverseView;
 vec4 ambientColor;
 PointLight pointLights[10];
 int pointLightCount;
 } ubo;
-
 layout(push_constant) uniform PushConstants
 {   
     vec4 lightPosition;
