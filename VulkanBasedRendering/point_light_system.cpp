@@ -1,5 +1,6 @@
 #pragma once
 #include "point_light_system.hpp"
+#include <map>
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -55,6 +56,7 @@ namespace lve {
 
         PipelineConfigInfo pipelineConfig{};
         LvePipeline::defaultPipelineConfigInfo(pipelineConfig);
+        LvePipeline::enableAlphaBlending(pipelineConfig);
         pipelineConfig.attributeDescriptions.clear();
         pipelineConfig.bindingDescriptions.clear();
         pipelineConfig.renderPass = renderPass;
@@ -89,7 +91,18 @@ namespace lve {
     }
 
     void PointLightSystem::render(FrameInfo& frameInfo)
-    {
+    {   
+        // sort the light
+        std::map<float, LveGameObject::id_t> sorted;
+        for (auto& kv : frameInfo.gameObjects) {
+            auto& obj = kv.second;
+            if (obj.pointLight == nullptr) continue;
+
+            // calculate distance
+            auto offset = frameInfo.camera.getCameraPosition() - obj.transform.translation;
+            float disSquared = glm::dot(offset, offset);
+            sorted[disSquared] = obj.getId();
+        }
         lvePipeline->bind(frameInfo.commandBuffer);
 
         vkCmdBindDescriptorSets(
@@ -102,24 +115,26 @@ namespace lve {
             0,
             nullptr);
 
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
-
-            PointLightPushConstantData push{};
-            push.position = glm::vec4(obj.transform.translation, 1.f);
-            push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
-            push.radius = obj.transform.scale.x;
+        // iterate over the sorted lights
+        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+            // use game obj id to find light object
+            auto& obj = frameInfo.gameObjects.at(it->second);
+			
+			PointLightPushConstantData push{};
+			push.position = glm::vec4(obj.transform.translation, 1.f);
+			push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			push.radius = obj.transform.scale.x;
 
             vkCmdPushConstants(
-                frameInfo.commandBuffer,
-                pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(PointLightPushConstantData),
-                &push);
-            vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
-        }
+				frameInfo.commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(PointLightPushConstantData),
+				&push);
+			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		}
+
 
     }
 

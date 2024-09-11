@@ -26,13 +26,14 @@ layout(push_constant) uniform PushConstants
 	float lightRadius;
 } push;
 
+const float M_PI = 3.14159265359;
 void main()
 {	
 	// discard distance from center
-	float distance = length(fragOffset);
+	float distance = sqrt(dot(fragOffset, fragOffset));
 	if (distance > 1.0)
 	{
 		discard;
 	}
-	outColor = vec4(push.lightColor.xyz, 1.0);
+	outColor = vec4(push.lightColor.xyz, 0.5 * (cos(distance * M_PI) +1) );
 }
