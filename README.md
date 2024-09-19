@@ -8,4 +8,4 @@
 
 ## Demo
 
-![Point Lights Demo](VulkanBasedRendering/Demos/point_lights.gif)
+![Point Lights Demo](VulkanBasedRendering/Demos/multipleLightsVisible.gif)
